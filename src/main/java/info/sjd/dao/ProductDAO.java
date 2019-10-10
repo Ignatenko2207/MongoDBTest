@@ -1,6 +1,7 @@
 package info.sjd.dao;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -8,7 +9,10 @@ import com.mongodb.client.MongoDatabase;
 import info.sjd.model.Product;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.Decimal128;
 
+import javax.script.Bindings;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,18 +38,18 @@ public class ProductDAO {
         MongoClient mongo = new MongoClient("localhost", 27017);
         MongoDatabase db = mongo.getDatabase("local");
         MongoCollection collection = db.getCollection("products");
-        
-        FindIterable dbObjects = collection.find();
-        mongo.close();
-        return toProductList(dbObjects);
-    }
-
-    private static List<Product> toProductList(FindIterable dbObjects) {
-        List<Product> products = new ArrayList<>();
-        for (Object object : dbObjects) {
-
+        List<Document> documents = (List<Document>) collection.find().into(new ArrayList<Document>());
+        List <Product> products = new ArrayList<>();
+        for (Document document : documents) {
+            Product product = new Product();
+            product.setArticle(document.getString("article"));
+            product.setName(document.getString("name"));
+            product.setPrice( new BigDecimal(((Decimal128)document.get("price")).doubleValue()));
+            products.add(product);
         }
+        mongo.close();
         return products;
     }
+
 
 }

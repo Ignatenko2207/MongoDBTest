@@ -23,5 +23,8 @@ class ProductDAOTest {
 
         List<Product> products = ProductDAO.getAll();
 
+        assertNotNull(products);
+        assertTrue(!products.isEmpty());
+        assertEquals("AI010115", products.get(0).getArticle());
     }
 }
